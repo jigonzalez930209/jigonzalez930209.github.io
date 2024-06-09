@@ -5,4 +5,5 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.glb'],
+  base: '/jigonzalez930209.github.io/',
 })
