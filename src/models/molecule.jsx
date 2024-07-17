@@ -203,8 +203,7 @@ const Molecule = ({ ...props }) => {
   })
 
   useEffect(() => {
-    if (!selectedAtom || preselectedAtom) {
-      console.log('returning')
+    if (!selectedAtom) {
       scene.children.forEach((child) => {
         if (child.name.includes('Atom')) {
           const materialCopy = staticAtoms[child.uuid].material.clone()
