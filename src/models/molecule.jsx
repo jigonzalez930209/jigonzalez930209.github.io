@@ -108,15 +108,25 @@ const Molecule = ({ ...props }) => {
       setPreselectedAtom(clickedObject)
       scene.children.forEach((child) => {
         if (child.name.includes('Atom') && child.name !== clickedObject.name) {
-          const materialCopy = staticAtoms[child.uuid].material
+          const materialCopy = staticAtoms[child.uuid].material.clone()
           child.material = materialCopy
         }
       })
 
-      clickedObject.material = new THREE.MeshBasicMaterial({
-        color: new THREE.Color('darkblue'),
-        alphaHash: 0,
-      })
+      const name = clickedObject.name.split('_')[1]
+      if (staticAtoms[clickedObject.uuid]?.newTexture) {
+        clickedObject.material.map =
+          staticAtoms[clickedObject.uuid].newTexture.clone()
+        clickedObject.material.needsUpdate = true
+      } else {
+        const newTexture = createRepeatingTextTexture(
+          name,
+          clickedObject.material.color
+        )
+        staticAtoms[clickedObject.uuid].newTexture = newTexture
+        clickedObject.material.map = newTexture
+        clickedObject.material.needsUpdate = true
+      }
 
       const optimalCameraPosition = findOptimalPoint(
         {
@@ -124,12 +134,12 @@ const Molecule = ({ ...props }) => {
           y: staticAtoms[clickedObject.uuid].y,
           z: staticAtoms[clickedObject.uuid].z,
         },
-        3,
+        4,
         scene.children
       )
       setLightPosition(optimalCameraPosition)
       new TWEEN.Tween(all.camera.position)
-        .to(optimalCameraPosition, 1000)
+        .to(optimalCameraPosition, 700)
         .easing(TWEEN.Easing.Cubic.Out)
         .start()
 
@@ -140,7 +150,7 @@ const Molecule = ({ ...props }) => {
       }
 
       new TWEEN.Tween(props.controls.current.target)
-        .to(targetPosition, 800)
+        .to(targetPosition, 700)
         .easing(TWEEN.Easing.Cubic.Out)
         .start()
     }
@@ -149,63 +159,63 @@ const Molecule = ({ ...props }) => {
   const handlePointerEnter = (event) => {
     event.stopPropagation()
 
-    const { object } = event
-    if (staticAtoms[object.uuid]?.isAtom === false) {
-      return
-    }
+    // const { object } = event
+    // if (staticAtoms[object.uuid]?.isAtom === false) {
+    //   return
+    // }
 
-    const name = object.name.split('_')[1]
-    if (staticAtoms[object.uuid]?.newTexture) {
-      object.material.map = staticAtoms[object.uuid].newTexture.clone()
-      object.material.needsUpdate = true
-      return
-    }
-    const newTexture = createRepeatingTextTexture(name, object.material.color)
-    staticAtoms[object.uuid].newTexture = newTexture
-    object.material.map = newTexture
-    object.material.needsUpdate = true
+    // const name = object.name.split('_')[1]
+    // if (staticAtoms[object.uuid]?.newTexture) {
+    //   object.material.map = staticAtoms[object.uuid].newTexture.clone()
+    //   object.material.needsUpdate = true
+    //   return
+    // }
+    // const newTexture = createRepeatingTextTexture(name, object.material.color)
+    // staticAtoms[object.uuid].newTexture = newTexture
+    // object.material.map = newTexture
+    // object.material.needsUpdate = true
   }
 
   const handlePointerLeave = (event) => {
     event.stopPropagation()
-    const { object } = event
+    // const { object } = event
 
-    if (staticAtoms[object.uuid]?.isAtom === false) return
+    // if (staticAtoms[object.uuid]?.isAtom === false) return
 
-    const materialCopy = staticAtoms[object.uuid].material.clone()
-    object.material = materialCopy
-    object.material.needsUpdate = true
+    // const materialCopy = staticAtoms[object.uuid].material.clone()
+    // object.material = materialCopy
+    // object.material.needsUpdate = true
   }
 
   useFrame(({ clock }) => {
-    const elapsedTime = clock.getElapsedTime()
-    const interval = 0.5
-
-    const toggle = Math.floor(elapsedTime / interval) % 2 === 0
-
-    if (!preselectedAtom) {
-      return
-    }
-
-    if (toggle) {
-      scene.children[staticAtoms[preselectedAtom.uuid].count].material =
-        staticAtoms[preselectedAtom.uuid].material.clone()
-      scene.children[
-        staticAtoms[preselectedAtom.uuid].count
-      ].material.needsUpdate = true
-    } else {
-      scene.children[staticAtoms[preselectedAtom.uuid].count].material.map =
-        staticAtoms[preselectedAtom.uuid].newTexture.clone()
-      scene.children[
-        staticAtoms[preselectedAtom.uuid].count
-      ].material.needsUpdate = true
-    }
+    // const elapsedTime = clock.getElapsedTime()
+    // const interval = 0.5
+    // const toggle = Math.floor(elapsedTime / interval) % 2 === 0
+    // if (!preselectedAtom) {
+    //   return
+    // }
+    // if (toggle) {
+    //   scene.children[staticAtoms[preselectedAtom.uuid].count].material =
+    //     staticAtoms[preselectedAtom.uuid].material.clone()
+    //   scene.children[
+    //     staticAtoms[preselectedAtom.uuid].count
+    //   ].material.needsUpdate = true
+    // } else {
+    //   scene.children[staticAtoms[preselectedAtom.uuid].count].material.map =
+    //     staticAtoms[preselectedAtom.uuid].newTexture.clone()
+    //   scene.children[
+    //     staticAtoms[preselectedAtom.uuid].count
+    //   ].material.needsUpdate = true
+    // }
   })
 
   useEffect(() => {
     if (!selectedAtom) {
       scene.children.forEach((child) => {
-        if (child.name.includes('Atom')) {
+        if (
+          child.name.includes('Atom') &&
+          child.uuid !== preselectedAtom?.uuid
+        ) {
           const materialCopy = staticAtoms[child.uuid].material.clone()
           child.material = materialCopy
           child.material.needsUpdate = true
