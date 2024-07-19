@@ -32,6 +32,7 @@ const Home = () => {
       />
       <section className="w-full h-screen relative">
         <Canvas
+          concurrent
           camera={{
             near: 0.01,
             far: 1000,
