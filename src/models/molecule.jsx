@@ -1,245 +1,298 @@
-/* eslint-disable react/prop-types */
+/* eslint-disable react/no-children-prop */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/no-unknown-property */
-import { useAnimations, useGLTF } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
-import TWEEN from '@tweenjs/tween.js'
-import React, { useEffect, useMemo, useRef } from 'react'
-import * as THREE from 'three'
+/* eslint-disable react/prop-types */
+
+import { a, config, useSpring } from '@react-spring/three'
+import {
+  ContactShadows,
+  Environment,
+  Float,
+  OrbitControls,
+  useAnimations,
+  useGLTF,
+} from '@react-three/drei'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Vector3 } from 'three'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+
+import { Loader } from '@/components'
+import { findOptimalPoint } from '@/utils'
 
 import islandScene from '../assets/3d/luciferin_animated.glb'
-import { findOptimalPoint } from '../utils'
 
-const Molecule = ({ ...props }) => {
-  const { selectedAtom, setSelectedAtom, setLightPosition } = props
+const CameraWrapper = ({ cameraPosition, target }) => {
+  const { camera } = useThree()
+  useEffect(() => {
+    camera.position.set(...cameraPosition)
+    camera.lookAt(new Vector3(...target))
+  }, [camera, cameraPosition, target])
+  return null
+}
 
-  const all = useThree()
-  const moleculeRef = useRef()
-  const { animations, scene } = useGLTF(islandScene)
-  const { names, actions, ref } = useAnimations(animations)
-  const [preselectedAtom, setPreselectedAtom] = React.useState(null)
-
-  const staticAtoms = useMemo(
-    () => {
-      return scene.children.reduce((acc, child, index) => {
-        return {
-          ...acc,
-          [child.uuid]: {
-            ...child.position,
-            material: child.material.clone(),
-            name: child.name,
-            count: index,
-            isAtom: child.name.includes('Atom'),
-          },
-        }
-      }, {})
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+const OrbitControlsWrapper = ({ target }) => {
+  const controlsRef = useRef()
+  const { camera, gl } = useThree()
 
   useEffect(() => {
-    names.forEach((name) => {
-      actions[name].play().setDuration(4)
-    })
+    if (controlsRef.current) {
+      controlsRef.current.target.set(...target)
+      controlsRef.current.update()
+    }
+  }, [target])
 
+  return <OrbitControls ref={controlsRef} args={[camera, gl.domElement]} />
+}
+
+const AnimateEyeToTarget = ({ position, target }) => {
+  const { camera, controls } = useThree()
+
+  const s = useSpring({
+    from: {
+      position: camera.position.toArray(),
+      target: controls?.target.toArray() || [0, 0, 0],
+    },
+    to: {
+      position: position,
+      target: target,
+    },
+    config: config.wobbly,
+    onStart: () => {
+      if (controls) controls.enabled = false
+    },
+    onRest: () => {
+      if (controls) controls.enabled = true
+    },
+  })
+
+  const AnimatedCameraWrapper = useMemo(() => a(CameraWrapper), [])
+  const AnimatedControlsWrapper = useMemo(() => a(OrbitControlsWrapper), [])
+
+  return (
+    <>
+      <AnimatedCameraWrapper cameraPosition={s.position} target={s.target} />
+      <AnimatedControlsWrapper target={s.target} />
+    </>
+  )
+}
+
+const EyeAnimation = ({ newPosition, target }) => {
+  return (
+    <AnimateEyeToTarget
+      position={newPosition.toArray()}
+      target={target.toArray()}
+    />
+  )
+}
+
+const AnimatedMolecule = ({
+  setCameraPosition,
+  setPreSelectedAtom,
+  preSelectedAtom,
+  setSelectedAtom,
+  selectedAtom,
+}) => {
+  const { animations, scene } = useGLTF(islandScene)
+  const { names, actions, ref } = useAnimations(animations)
+  const [font, setFont] = useState(null)
+  const loader = new FontLoader()
+
+  const [hovered, setHovered] = useState(false)
+
+  const staticAtoms = useMemo(() => {
+    return scene.children.reduce((acc, child, index) => {
+      return {
+        ...acc,
+        [child.uuid]: {
+          ...child.position,
+          geometry: child.geometry.clone(),
+          material: child.material.clone(),
+          object: child.clone(),
+          name: child.name,
+          count: index,
+          isAtom: child.name.includes('Atom'),
+        },
+      }
+    }, {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const createRepeatingTextTexture = (
-    text,
-    backgroundColor = new THREE.Color(0x000000),
-    width = 512,
-    height = 512,
-    repeatX = 2,
-    repeatY = 2
-  ) => {
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    const context = canvas.getContext('2d')
-
-    backgroundColor.offsetHSL(0, 0, 0.12).clone()
-    const hexColor = `#${backgroundColor.getHexString()}`
-
-    context.fillStyle = hexColor
-    context.fillRect(0, 0, width, height)
-
-    context.font = 'Bold 100px Arial'
-
-    context.fillStyle = `black`
-    context.textAlign = 'center'
-    context.textBaseline = 'middle'
-
-    for (let i = 0; i <= repeatX; i++) {
-      for (let j = 0; j <= repeatY; j++) {
-        context.save()
-
-        const x = (i + 0.5) * (width / repeatX)
-        const y = (j + 0.5) * (height / repeatY)
-
-        context.translate(x, y)
-
-        const angle = Math.random() * 2 * Math.PI
-        context.rotate(angle)
-
-        context.fillText(text, 0, 0)
-
-        context.restore()
-      }
+  const geometryText = async (name) => {
+    if (font) {
+      const geometry = new TextGeometry(name, {
+        font,
+        size: 1,
+        height: 0.25,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.125,
+        bevelSize: 0.025,
+        bevelOffset: 0,
+        bevelSegments: 4,
+      })
+      await geometry.center()
+      return await geometry
     }
-
-    const texture = new THREE.CanvasTexture(canvas)
-    texture.wrapS = THREE.MirroredRepeatWrapping
-    texture.wrapT = THREE.MirroredRepeatWrapping
-    texture.repeat.set(repeatX, repeatY)
-    return texture
+    return null
   }
 
-  const handleClick = (event) => {
+  const onPointerUp = async (event) => {
     event.stopPropagation()
+    const { object } = event
+    const { position } = object
     const clickedObject = event.object
 
-    if (clickedObject.name.includes('Atom')) {
-      if (preselectedAtom?.name === clickedObject?.name) {
-        setPreselectedAtom(null)
-        setSelectedAtom(clickedObject.name)
-        return
-      }
-      setPreselectedAtom(clickedObject)
-      scene.children.forEach((child) => {
-        if (child.name.includes('Atom') && child.name !== clickedObject.name) {
-          const materialCopy = staticAtoms[child.uuid].material.clone()
-          child.material = materialCopy
-        }
+    if (!clickedObject.name.includes('Atom')) return
+
+    const name = clickedObject.name.split('_')[1]
+    if (preSelectedAtom?.object.uuid !== clickedObject.uuid) {
+      setPreSelectedAtom({
+        position,
+        name,
+        object: clickedObject,
+        color: clickedObject.material.color,
       })
 
-      const name = clickedObject.name.split('_')[1]
-      if (staticAtoms[clickedObject.uuid]?.newTexture) {
-        clickedObject.material.map =
-          staticAtoms[clickedObject.uuid].newTexture.clone()
-        clickedObject.material.needsUpdate = true
-      } else {
-        const newTexture = createRepeatingTextTexture(
-          name,
-          clickedObject.material.color
-        )
-        staticAtoms[clickedObject.uuid].newTexture = newTexture
-        clickedObject.material.map = newTexture
-        clickedObject.material.needsUpdate = true
-      }
-
-      const optimalCameraPosition = findOptimalPoint(
-        {
-          x: staticAtoms[clickedObject.uuid].x,
-          y: staticAtoms[clickedObject.uuid].y,
-          z: staticAtoms[clickedObject.uuid].z,
-        },
-        4,
-        scene.children
+      object.geometry = await geometryText(name)
+      object.material.color.set(
+        `#${staticAtoms[object.uuid].material.color.getHexString()}`
       )
-      setLightPosition(optimalCameraPosition)
-      new TWEEN.Tween(all.camera.position)
-        .to(optimalCameraPosition, 700)
-        .easing(TWEEN.Easing.Cubic.Out)
-        .start()
+      setHovered(false)
+    } else {
+      setSelectedAtom(name)
+    }
 
-      const targetPosition = {
-        x: clickedObject.position.x,
-        y: clickedObject.position.y,
-        z: clickedObject.position.z,
+    scene.children.forEach((child) => {
+      if (child.uuid !== object.uuid && child.name.includes('Atom')) {
+        child.geometry = staticAtoms[child.uuid].geometry.clone()
+        child.geometry.needUpdate = true
       }
+    })
 
-      new TWEEN.Tween(props.controls.current.target)
-        .to(targetPosition, 700)
-        .easing(TWEEN.Easing.Cubic.Out)
-        .start()
+    const newCameraPosition = findOptimalPoint(position, 5, scene.children)
+    setCameraPosition(newCameraPosition)
+  }
+
+  const onPointerEnter = (event) => {
+    event.stopPropagation()
+    const { object } = event
+    if (object.name.includes('Atom')) {
+      setHovered(true)
+      object.material.color.set(0x00ff00)
     }
   }
 
-  const handlePointerEnter = (event) => {
+  const onPointerLeave = (event) => {
     event.stopPropagation()
-
-    // const { object } = event
-    // if (staticAtoms[object.uuid]?.isAtom === false) {
-    //   return
-    // }
-
-    // const name = object.name.split('_')[1]
-    // if (staticAtoms[object.uuid]?.newTexture) {
-    //   object.material.map = staticAtoms[object.uuid].newTexture.clone()
-    //   object.material.needsUpdate = true
-    //   return
-    // }
-    // const newTexture = createRepeatingTextTexture(name, object.material.color)
-    // staticAtoms[object.uuid].newTexture = newTexture
-    // object.material.map = newTexture
-    // object.material.needsUpdate = true
+    const { object } = event
+    if (object.name.includes('Atom')) {
+      setHovered(false)
+      object.material.color.set(
+        `#${staticAtoms[object.uuid].material.color.getHexString()}`
+      )
+    }
   }
-
-  const handlePointerLeave = (event) => {
-    event.stopPropagation()
-    // const { object } = event
-
-    // if (staticAtoms[object.uuid]?.isAtom === false) return
-
-    // const materialCopy = staticAtoms[object.uuid].material.clone()
-    // object.material = materialCopy
-    // object.material.needsUpdate = true
-  }
-
-  useFrame(({ clock }) => {
-    // const elapsedTime = clock.getElapsedTime()
-    // const interval = 0.5
-    // const toggle = Math.floor(elapsedTime / interval) % 2 === 0
-    // if (!preselectedAtom) {
-    //   return
-    // }
-    // if (toggle) {
-    //   scene.children[staticAtoms[preselectedAtom.uuid].count].material =
-    //     staticAtoms[preselectedAtom.uuid].material.clone()
-    //   scene.children[
-    //     staticAtoms[preselectedAtom.uuid].count
-    //   ].material.needsUpdate = true
-    // } else {
-    //   scene.children[staticAtoms[preselectedAtom.uuid].count].material.map =
-    //     staticAtoms[preselectedAtom.uuid].newTexture.clone()
-    //   scene.children[
-    //     staticAtoms[preselectedAtom.uuid].count
-    //   ].material.needsUpdate = true
-    // }
-  })
 
   useEffect(() => {
-    if (!selectedAtom) {
-      scene.children.forEach((child) => {
-        if (
-          child.name.includes('Atom') &&
-          child.uuid !== preselectedAtom?.uuid
-        ) {
-          const materialCopy = staticAtoms[child.uuid].material.clone()
-          child.material = materialCopy
-          child.material.needsUpdate = true
-        }
-      })
+    loader.load(
+      'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+      setFont
+    )
+    names.forEach((name) => {
+      actions[name].play().setDuration(4)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!selectedAtom && preSelectedAtom?.object) {
+      preSelectedAtom.object.geometry =
+        staticAtoms[preSelectedAtom.object.uuid].geometry.clone()
+      setPreSelectedAtom(null)
     }
-  }, [selectedAtom, scene.children, staticAtoms, preselectedAtom])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAtom])
+
+  useEffect(() => {
+    if (hovered) document.body.style.cursor = 'pointer'
+    return () => (document.body.style.cursor = 'auto')
+  }, [hovered])
+
+  useFrame(({ camera }) => {
+    if (preSelectedAtom?.object) {
+      preSelectedAtom.object.quaternion.copy(camera.quaternion)
+    }
+  })
 
   return (
-    <mesh
-      ref={ref}
-      {...props}
-      style={{ cursor: 'move' }}
-      onPointerDown={!selectedAtom && handleClick}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-    >
-      <primitive
-        style={{ cursor: 'inherit' }}
-        ref={moleculeRef}
-        object={scene}
-        rotateX={1}
+    <>
+      <Float
+        position={[0, 0, 0]}
+        speed={1}
+        rotationIntensity={1}
+        floatIntensity={5}
+      >
+        <mesh
+          ref={ref}
+          onPointerUp={onPointerUp}
+          onPointerEnter={onPointerEnter}
+          onPointerLeave={onPointerLeave}
+        >
+          <primitive object={scene} />
+        </mesh>
+      </Float>
+      <ContactShadows
+        position={[0, -5, 0]}
+        scale={20}
+        blur={1}
+        opacity={0.9}
+        far={10}
       />
-    </mesh>
+    </>
   )
 }
+
+const Molecule = ({ selectedAtom, setSelectedAtom }) => {
+  const [cameraPosition, setCameraPosition] = useState(
+    new Vector3(1, 9.5, -0.2)
+  )
+  const [target, setTarget] = useState(new Vector3(0, 0, 0))
+  const [preSelectedAtom, setPreSelectedAtom] = useState(null)
+
+  useEffect(() => {
+    if (preSelectedAtom?.position) {
+      setTarget(preSelectedAtom.position)
+    }
+    if (!preSelectedAtom) {
+      setTarget(new Vector3(0, 0, 0))
+      setCameraPosition(new Vector3(1, 9.5, -0.2))
+    }
+  }, [preSelectedAtom])
+
+  return (
+    <Canvas
+      camera={{
+        near: 0.01,
+        far: 1000,
+        position: [1, 9.5, -0.2],
+      }}
+    >
+      <Suspense fallback={<Loader />}>
+        <Environment preset="sunset" />
+        <AnimatedMolecule
+          setCameraPosition={setCameraPosition}
+          setTarget={setTarget}
+          setPreSelectedAtom={setPreSelectedAtom}
+          setSelectedAtom={setSelectedAtom}
+          selectedAtom={selectedAtom}
+          preSelectedAtom={preSelectedAtom}
+        />
+        <EyeAnimation newPosition={cameraPosition} target={target} />
+      </Suspense>
+    </Canvas>
+  )
+}
+
 export default Molecule
