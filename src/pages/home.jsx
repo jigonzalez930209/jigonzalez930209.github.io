@@ -1,13 +1,7 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable react/no-unknown-property */
 import DialogCloseButton from '@/components/dialog-wrapper'
-import Molecule from '@/models/molecule'
-import { OrbitControls } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import * as React from 'react'
-import Loader from '../components/loader'
-import Tween from '../components/tween'
-import Sky from '../models/sky'
+
+import Molecule from '@/models/molecule'
 
 const ATOMS_DESCRIPTION = {
   C: 'Carbon is a nonmetallic element that forms the basis of organic chemistry. It is the fourth most abundant element in the universe by mass and is found in all known life forms. Carbon atoms can bond with each other to form various structures, including chains, rings, and complex frameworks, making it incredibly versatile in forming compounds.',
@@ -19,55 +13,22 @@ const ATOMS_DESCRIPTION = {
 }
 
 const Home = () => {
-  const refControlOrbitals = React.useRef()
+  // const refControlOrbitals = React.useRef()
   const [selectedAtom, setSelectedAtom] = React.useState(null)
-  const [lightPosition, setLightPosition] = React.useState([0, 7, 0])
+  // const [lightPosition, setLightPosition] = React.useState([0, 7, 0])
   return (
     <div className="absolute w-full h-full bg-slate-600 select-none">
       <DialogCloseButton
-        title={selectedAtom?.split('_')[1] || ' '}
-        content={ATOMS_DESCRIPTION[selectedAtom?.split('_')[1]] || ' '}
+        title={selectedAtom || ' '}
+        content={ATOMS_DESCRIPTION[selectedAtom] || ' '}
         open={selectedAtom !== null}
         onOpenChange={setSelectedAtom}
       />
       <section className="w-full h-screen relative">
-        <Canvas
-          concurrent
-          camera={{
-            near: 0.01,
-            far: 1000,
-            position: [1, 9.5, -0.2],
-          }}
-        >
-          <React.Suspense fallback={<Loader />}>
-            <directionalLight position={lightPosition} intensity={2} />
-            <ambientLight intensity={0.2} />
-            <hemisphereLight groundColor="#ff00ff" intensity={0} />
-            <OrbitControls
-              ref={refControlOrbitals}
-              maxZoom={0}
-              minZoom={1}
-              maxDistance={15}
-              minDistance={1}
-              position={[0, 8, 0]}
-              keys={{
-                LEFT: 'ArrowLeft',
-                RIGHT: 'ArrowRight',
-                UP: 'ArrowUp',
-                BOTTOM: 'ArrowDown',
-              }}
-            />
-            <Sky />
-            <Molecule
-              controls={refControlOrbitals}
-              selectedAtom={selectedAtom}
-              setSelectedAtom={setSelectedAtom}
-              setLightPosition={setLightPosition}
-            />
-            {/* <Stats /> */}
-            <Tween />
-          </React.Suspense>
-        </Canvas>
+        <Molecule
+          selectedAtom={selectedAtom}
+          setSelectedAtom={setSelectedAtom}
+        />
       </section>
     </div>
   )
