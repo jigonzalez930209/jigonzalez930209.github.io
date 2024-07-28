@@ -14,7 +14,7 @@ import {
 const DialogCloseButton = ({ ...props }) => {
   const { title, content, open, onOpenChange } = props
   return (
-    <Dialog open={open} onOpenChange={(state) => !state && onOpenChange(null)}>
+    <Dialog open={open} onOpenChange={() => onOpenChange(null)}>
       <DialogContent aria-describedby={title} className="sm:max-w-md">
         <DialogDescription>
           <span className="sr-only">{title}</span>
