@@ -2,6 +2,10 @@ import DialogCloseButton from '@/components/dialog-wrapper'
 import * as React from 'react'
 
 import Molecule from '@/models/molecule'
+import imgFanHandlerProject from '../assets/images/fan-handler.png'
+import imgGrafProject from '../assets/images/graf.png'
+import imgImagesProject from '../assets/images/image.png'
+import videoThisProjectProject from '../assets/videos/this-project.mp4'
 
 const ATOMS_DESCRIPTION = {
   C: 'Carbon is a nonmetallic element that forms the basis of organic chemistry. It is the fourth most abundant element in the universe by mass and is found in all known life forms. Carbon atoms can bond with each other to form various structures, including chains, rings, and complex frameworks, making it incredibly versatile in forming compounds.',
@@ -12,17 +16,60 @@ const ATOMS_DESCRIPTION = {
   ' ': 'On selection error',
 }
 
+const PROJECTS = [
+  {
+    id: 'C',
+    title: 'Graf_v3',
+    description:
+      'Tool for visualize and analyze the data from the teq4, teq4Z and CSV files',
+    link: 'https://github.com/jigonzalez930209/graf_v3',
+    image: imgGrafProject,
+  },
+  {
+    id: 'S',
+    title: 'Images',
+    description:
+      'Visualizer focused on electronic microscopic images to analyzer and modify it',
+    link: 'https://github.com/jigonzalez930209/images',
+    image: imgImagesProject,
+  },
+  {
+    id: 'O',
+    title: 'Fan Handler',
+    description:
+      'Control your fan from a web page using low cost hardware in your local network',
+    link: 'https://github.com/jigonzalez930209/FanHandler-arduino-react',
+    image: imgFanHandlerProject,
+  },
+  {
+    id: 'N',
+    title: 'Portfolio code',
+    description:
+      'Project developed with React, TailwindCSS, shadcn and ThreeJS to show my projects and my skills',
+    link: 'https://github.com/jigonzalez930209/jigonzalez930209.github.io/tree/main',
+    video: videoThisProjectProject,
+  },
+  {
+    id: 'H',
+    title: 'Projects I have worked on',
+    description:
+      'Experience in the development of software as fronted using React, NextJs, TailwindCSS, Material-UI, ShadCN and ThreeJS',
+    link: '#',
+    image: imgFanHandlerProject,
+  },
+]
+
 const Home = () => {
-  // const refControlOrbitals = React.useRef()
   const [selectedAtom, setSelectedAtom] = React.useState(null)
-  // const [lightPosition, setLightPosition] = React.useState([0, 7, 0])
+
   return (
-    <div className="absolute w-full h-full bg-slate-600 select-none">
+    <div className="absolute w-full h-dvh overflow-hidden bg-slate-600 select-none">
       <DialogCloseButton
         title={selectedAtom || ' '}
         content={ATOMS_DESCRIPTION[selectedAtom] || ' '}
         open={selectedAtom !== null}
         onOpenChange={setSelectedAtom}
+        cardContent={PROJECTS.find((project) => project.id === selectedAtom)}
       />
       <section className="w-full h-screen relative">
         <Molecule
