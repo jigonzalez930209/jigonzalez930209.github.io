@@ -3,7 +3,8 @@
 /* eslint-disable react/no-unknown-property */
 /* eslint-disable react/prop-types */
 
-import { a, config, useSpring } from '@react-spring/three'
+import { a, useSpring } from '@react-spring/three'
+import { easings } from '@react-spring/web'
 import {
   ContactShadows,
   Environment,
@@ -43,7 +44,14 @@ const OrbitControlsWrapper = ({ target }) => {
     }
   }, [target])
 
-  return <OrbitControls ref={controlsRef} args={[camera, gl.domElement]} />
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      maxDistance={15}
+      minDistance={3}
+      args={[camera, gl.domElement]}
+    />
+  )
 }
 
 const AnimateEyeToTarget = ({ position, target }) => {
@@ -58,7 +66,10 @@ const AnimateEyeToTarget = ({ position, target }) => {
       position: position,
       target: target,
     },
-    config: config.wobbly,
+    config: {
+      easing: easings.easeInCubic(5),
+    },
+
     onStart: () => {
       if (controls) controls.enabled = false
     },
@@ -258,7 +269,7 @@ const Molecule = ({ selectedAtom, setSelectedAtom }) => {
   const [cameraPosition, setCameraPosition] = useState(
     new Vector3(1, 9.5, -0.2)
   )
-  const [target, setTarget] = useState(new Vector3(0, 0, 0))
+  const [target, setTarget] = useState(new Vector3(0, 1, 0))
   const [preSelectedAtom, setPreSelectedAtom] = useState(null)
 
   useEffect(() => {
@@ -267,7 +278,7 @@ const Molecule = ({ selectedAtom, setSelectedAtom }) => {
     }
     if (!preSelectedAtom) {
       setTarget(new Vector3(0, 0, 0))
-      setCameraPosition(new Vector3(1, 9.5, -0.2))
+      setCameraPosition(new Vector3(1, 10, -0.3))
     }
   }, [preSelectedAtom])
 
@@ -277,6 +288,7 @@ const Molecule = ({ selectedAtom, setSelectedAtom }) => {
         near: 0.01,
         far: 1000,
         position: [1, 9.5, -0.2],
+        zoom: 1,
       }}
     >
       <Suspense fallback={<Loader />}>
