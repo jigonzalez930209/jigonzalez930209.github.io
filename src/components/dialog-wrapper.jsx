@@ -10,20 +10,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import ProjectCard from './project-card'
 
 const DialogCloseButton = ({ ...props }) => {
-  const { title, content, open, onOpenChange } = props
+  const { title, content, open, onOpenChange, cardContent } = props
+
+  console.log('cardContent', cardContent)
+
   return (
-    <Dialog open={open} onOpenChange={() => onOpenChange(null)}>
-      <DialogContent aria-describedby={title} className="sm:max-w-md">
-        <DialogDescription>
-          <span className="sr-only">{title}</span>
-        </DialogDescription>
+    <Dialog modal open={open} onOpenChange={() => onOpenChange(null)}>
+      <DialogContent aria-describedby={title} className=" w-[90vw] h-[95vh]">
         <DialogHeader>
           <DialogTitle className="text-foreground">{title}</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center space-x-2 text-foreground">
+        <DialogDescription>
+          <span className="sr-only">{title}</span>
+        </DialogDescription>
+        <div className="flex flex-col items-center space-x-2 text-foreground gap-7 h-[70vh] scrollbar-thin scrollbar-track-transparent scrollbar-thumb-accent scrollbar-thumb-rounded-md d overflow-y-scroll">
           {content}
+          <ProjectCard {...cardContent} />
         </div>
         <DialogFooter className="justify-end">
           <DialogClose asChild>
