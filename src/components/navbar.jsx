@@ -15,7 +15,6 @@ import { cn } from '@/utils'
 
 const NavLinkItems = [
   { content: 'Home', to: '/' },
-  { content: 'Projects', to: '/projects', disabled: true },
   { content: 'Contact Me', to: '/contact', disabled: true },
   { content: 'About', to: '/about', disabled: true },
 ]
@@ -46,9 +45,9 @@ const Navbar = () => {
   const { pathname } = useLocation()
 
   return (
-    <header className="absolute w-full z-50 top-0 flex text-lg font-medium h-16 justify-between bg-secondary items-center gap-4 px-4 md:px-6 dark:text-slate-400 text-slate-600">
+    <header className="absolute w-full z-50 top-0 flex text-lg font-medium h-16 justify-between bg-secondary items-center gap-4 px-4 md:px-20 dark:text-slate-400 text-slate-600">
       <TooltipProvider delayDuration={10}>
-        <nav className="hidden flex-col select-none gap-6 md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        <nav className="hidden flex-col select-none sm:w-full gap-6 sm:flex sm:flex-row items-center justify-center sm:text-sm">
           {NavLinkItems.map((item) => (
             <NavItem
               key={item.content}
@@ -64,7 +63,7 @@ const Navbar = () => {
             <Button
               variant="outline"
               size="icon"
-              className="shrink-0 md:hidden"
+              className="shrink-0 sm:hidden"
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
