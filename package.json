@@ -21,6 +21,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@react-spring/three": "^9.7.3",
+    "@react-spring/web": "^9.7.4",
     "@react-three/drei": "^9.107.0",
     "@react-three/fiber": "^8.16.8",
     "@reduxjs/toolkit": "^1.9.7",
@@ -37,7 +38,6 @@
     "react-router-dom": "^6.24.0",
     "react-vertical-timeline-component": "^3.6.0",
     "tailwind-merge": "^2.3.0",
-    "tailwindcss-animate": "^1.0.7",
     "three": "^0.157.0"
   },
   "devDependencies": {
@@ -51,7 +51,9 @@
     "eslint-plugin-react-refresh": "^0.4.7",
     "gh-pages": "^6.1.1",
     "postcss": "^8.4.38",
+    "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.4",
+    "tailwindcss-animate": "^1.0.7",
     "vite": "^4.5.3"
   }
 }
