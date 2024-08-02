@@ -15,6 +15,7 @@ import {
 } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 import { Vector3 } from 'three'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
@@ -113,7 +114,45 @@ const AnimatedMolecule = ({
   const [hovered, setHovered] = useState(false)
 
   const staticAtoms = useMemo(() => {
+    return [
+      ...scene.children
+        .filter((child) => child.name.includes('Atom'))
+        .map((child) => ({ position: { ...child.position } })),
+    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const staticElements = useMemo(() => {
     return scene.children.reduce((acc, child, index) => {
+      // Change the geometry of the bond
+      if (child.name.includes('Bond')) {
+        child.geometry = new THREE.CylinderGeometry(
+          0.4,
+          0.4,
+          1,
+          64,
+          64,
+          false,
+          0,
+          Math.PI * 2
+        )
+      }
+
+      // Change the geometry of the atom
+      if (child.name.includes('Atom')) {
+        const geometry = new THREE.SphereGeometry(
+          child.geometry.boundingSphere.radius - 0.29,
+          56,
+          32,
+          0,
+          Math.PI * 2,
+          0,
+          Math.PI
+        )
+        geometry.boundingSphere = child.geometry.boundingSphere
+        child.geometry = geometry
+      }
+
       return {
         ...acc,
         [child.uuid]: {
@@ -168,7 +207,7 @@ const AnimatedMolecule = ({
 
       object.geometry = await geometryText(name)
       object.material.color.set(
-        `#${staticAtoms[object.uuid].material.color.getHexString()}`
+        `#${staticElements[object.uuid].material.color.getHexString()}`
       )
       setHovered(false)
     } else {
@@ -177,12 +216,12 @@ const AnimatedMolecule = ({
 
     scene.children.forEach((child) => {
       if (child.uuid !== object.uuid && child.name.includes('Atom')) {
-        child.geometry = staticAtoms[child.uuid].geometry.clone()
+        child.geometry = staticElements[child.uuid].geometry.clone()
         child.geometry.needUpdate = true
       }
     })
 
-    const newCameraPosition = findOptimalPoint(position, 5, scene.children)
+    const newCameraPosition = findOptimalPoint(position, 5, staticAtoms)
     setCameraPosition(newCameraPosition)
   }
 
@@ -192,6 +231,7 @@ const AnimatedMolecule = ({
     if (object.name.includes('Atom')) {
       setHovered(true)
       object.material.color.set(0x00ff00)
+      console.log(object.geometry)
     }
   }
 
@@ -201,7 +241,7 @@ const AnimatedMolecule = ({
     if (object.name.includes('Atom')) {
       setHovered(false)
       object.material.color.set(
-        `#${staticAtoms[object.uuid].material.color.getHexString()}`
+        `#${staticElements[object.uuid].material.color.getHexString()}`
       )
     }
   }
@@ -214,13 +254,14 @@ const AnimatedMolecule = ({
     names.forEach((name) => {
       actions[name].play().setDuration(4)
     })
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     if (!selectedAtom && preSelectedAtom?.object) {
       preSelectedAtom.object.geometry =
-        staticAtoms[preSelectedAtom.object.uuid].geometry.clone()
+        staticElements[preSelectedAtom.object.uuid].geometry.clone()
       setPreSelectedAtom(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,9 +296,9 @@ const AnimatedMolecule = ({
         </mesh>
       </Float>
       <ContactShadows
-        position={[0, -5, 0]}
+        position={[0, -3.5, 0]}
         scale={20}
-        blur={1}
+        blur={0.7}
         opacity={0.9}
         far={10}
       />
@@ -302,6 +343,8 @@ const Molecule = ({ selectedAtom, setSelectedAtom }) => {
           preSelectedAtom={preSelectedAtom}
         />
         <EyeAnimation newPosition={cameraPosition} target={target} />
+        {/* <Stats />
+        <axesHelper args={[5]} /> */}
       </Suspense>
     </Canvas>
   )
