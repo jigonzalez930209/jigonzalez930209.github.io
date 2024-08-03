@@ -7,21 +7,8 @@ export const cn = (...args) => {
 }
 
 export const findOptimalPoint = (target, radius, atoms) => {
-  const pointsOnSphere = 50
-  const newAtoms = atoms.reduce(
-    (acc, atom) => [
-      ...acc,
-      {
-        ...atom,
-        position: new THREE.Vector3(
-          atom.position.x,
-          atom.position.y - 2,
-          atom.position.z
-        ),
-      },
-    ],
-    [...atoms]
-  )
+  const pointsOnSphere = 150
+
   let maxMinDistance = -Infinity
   let optimalPoint = null
 
@@ -29,7 +16,7 @@ export const findOptimalPoint = (target, radius, atoms) => {
     const point = generatePointOnSphere(target, radius)
 
     let minDistance = Infinity
-    newAtoms.forEach((atom) => {
+    atoms.forEach((atom) => {
       const distance = point.distanceTo(atom.position)
       if (distance < minDistance) {
         minDistance = distance
