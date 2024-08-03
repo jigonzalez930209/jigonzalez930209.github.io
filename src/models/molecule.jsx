@@ -117,8 +117,26 @@ const AnimatedMolecule = ({
     return [
       ...scene.children
         .filter((child) => child.name.includes('Atom'))
-        .map((child) => ({ position: { ...child.position } })),
+        // Duplicate the atoms to create a always over ground effect
+        .reduce(
+          (acc, currentAtom) => [
+            ...acc,
+            ...[
+              { ...currentAtom, position: { ...currentAtom.position } },
+              {
+                ...currentAtom,
+                position: new THREE.Vector3(
+                  currentAtom.position.x,
+                  currentAtom.position.y - 2,
+                  currentAtom.position.z
+                ),
+              },
+            ],
+          ],
+          []
+        ),
     ]
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
