@@ -31,7 +31,7 @@ const AnimatedMolecule = ({
   const { names, actions, ref } = useAnimations(animations)
   const [font, setFont] = useState(null)
   const loader = new FontLoader()
-  const { increaseStep, tourActive } = useTour()
+  const { increaseStep, tourStep } = useTour()
 
   const [hovered, setHovered] = useState(false)
 
@@ -150,8 +150,9 @@ const AnimatedMolecule = ({
         `#${staticElements[object.uuid].material.color.getHexString()}`
       )
       setHovered(false)
-      increaseStep()
+      tourStep < 2 && increaseStep()
     } else {
+      tourStep && increaseStep()
       setSelectedAtom(name)
     }
 
