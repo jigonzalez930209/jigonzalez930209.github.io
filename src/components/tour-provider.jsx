@@ -2,6 +2,12 @@
 /* eslint-disable react/prop-types */
 import { createContext, useContext, useState } from 'react'
 
+const STEPS = {
+  1: 'Please select any atom to start the tour',
+  2: 'Select again the atom to see the next step',
+  3: 'Please select a card to link the github code',
+}
+
 export const TourProviderContext = createContext()
 
 export const TourProvider = ({ children }) => {
@@ -10,9 +16,35 @@ export const TourProvider = ({ children }) => {
   }
 
   const [tourActive, setTourActive] = useState(false)
-  const [step, setStep] = useState(0)
-  const increaseStep = () => setStep((prev) => tourActive && prev + 1)
-  const decreaseStep = () => setStep((prev) => tourActive && prev - 1)
+  const [step, setStep] = useState(1)
+  const [tourStepText, setTourStepText] = useState(STEPS[step])
+  const increaseStep = () => {
+    setStep((prev) => {
+      if (tourActive && STEPS[prev + 1]) {
+        setTourStepText(STEPS[prev + 1])
+        return prev + 1
+      } else {
+        setTourStepText(STEPS[1])
+        return 1
+      }
+    })
+  }
+  const decreaseStep = () =>
+    setStep((prev) => {
+      if (tourActive && STEPS[prev - 1]) {
+        setTourStepText(STEPS[prev - 1])
+        return prev - 1
+      } else {
+        setTourStepText(STEPS[1])
+        return 1
+      }
+    })
+
+  const cleanTour = () => {
+    setTourActive(false)
+    setStep(1)
+    setTourStepText(STEPS[1])
+  }
 
   return (
     <TourProviderContext.Provider
@@ -22,6 +54,8 @@ export const TourProvider = ({ children }) => {
         tourStep: step,
         increaseStep,
         decreaseStep,
+        tourText: tourStepText,
+        cleanTour,
       }}
     >
       {children}
