@@ -46,8 +46,6 @@ const Navbar = () => {
   const { pathname } = useLocation()
   const tour = useTour()
 
-  console.log(tour)
-
   return (
     <header className="absolute w-full z-50 top-0 flex text-lg font-medium h-16 justify-between bg-secondary items-center gap-4 px-4 md:px-20 dark:text-slate-400 text-slate-600">
       <TooltipProvider delayDuration={10}>
@@ -68,7 +66,7 @@ const Navbar = () => {
               <TooltipTrigger>
                 <div
                   className="hover:cursor-pointer hover:text-slate-300"
-                  onClick={() => tour.setTourActive(true)}
+                  onClick={() => tour.setTourActive(!tour.tourActive)}
                 >
                   take a tour
                 </div>
