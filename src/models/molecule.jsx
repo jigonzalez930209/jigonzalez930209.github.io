@@ -16,7 +16,7 @@ import { EyeAnimation } from './controls/animate-eye'
 import TextOverCanvas from './text-over-canvas'
 
 const Molecule = ({ selectedAtom, setSelectedAtom }) => {
-  const { tourActive } = useTour()
+  const { tourActive, tourText, cleanTour } = useTour()
 
   const [cameraPosition, setCameraPosition] = useState(
     new Vector3(1, 9.5, -0.2)
@@ -31,16 +31,18 @@ const Molecule = ({ selectedAtom, setSelectedAtom }) => {
     if (!preSelectedAtom) {
       setTarget(new Vector3(0, 0, 0))
       setCameraPosition(new Vector3(1, 10, -0.3))
+      cleanTour()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preSelectedAtom])
 
   return (
     <Canvas
       camera={{
-        near: 0.01,
-        far: 1000,
+        near: 1,
+        far: 10000,
         position: [1, 9.5, -0.2],
-        zoom: 1,
+        fov: 70,
       }}
     >
       <Suspense fallback={<Loader />}>
@@ -57,7 +59,7 @@ const Molecule = ({ selectedAtom, setSelectedAtom }) => {
         {/* <Stats />
         <axesHelper args={[5]} /> */}
         {tourActive && (
-          <TextOverCanvas offset={4} text="click any atom " size={0.5} />
+          <TextOverCanvas offset={4} text={tourText} size={0.11} />
         )}
       </Suspense>
     </Canvas>
