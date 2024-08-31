@@ -3,8 +3,8 @@
 import { createContext, useContext, useState } from 'react'
 
 const STEPS = {
-  1: 'Please select any atom to start the tour',
-  2: 'Select again the atom to see the next step',
+  1: '    Please select any \n atom to start the tour',
+  2: 'Select again the atom\n to see the next step',
   3: 'Please select a card to link the github code',
 }
 
