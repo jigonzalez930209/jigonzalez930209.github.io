@@ -67,8 +67,13 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        borderGlow: {
+          '0%, 100%': { borderColor: 'gray' }, // Blue
+          '50%': { borderColor: 'white' }, // Yellow
+        },
       },
       animation: {
+        'border-glow': 'borderGlow 2s infinite',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
