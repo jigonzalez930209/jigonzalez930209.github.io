@@ -1,15 +1,11 @@
 // import { Contact } from 'lucide-react'
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import { Navbar } from './components'
-import {
-  // About,
-  // Projects,
-  Home,
-} from './pages'
+import { About, Contact, Home } from './pages'
 
 const App = () => {
   return (
-    <main className="bg-slate-300/20 w-screen h-screen relative ">
+    <main className="bg-slate-300/20 w-screen h-screen relative">
       <Router>
         <Navbar />
         <Routes>
@@ -20,8 +16,8 @@ const App = () => {
               <>
                 <Routes>
                   {/* <Route path="/projects" element={<Projects />} /> */}
-                  {/* <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} /> */}
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
                 </Routes>
               </>
             }

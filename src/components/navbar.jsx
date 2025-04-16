@@ -17,8 +17,8 @@ import { useTour } from './tour-provider'
 
 const NavLinkItems = [
   { content: 'Home', to: '/' },
-  { content: 'Contact Me', to: '/contact', disabled: true },
-  { content: 'About', to: '/about', disabled: true },
+  { content: 'Contact Me', to: '/contact', disabled: false },
+  { content: 'About', to: '/about', disabled: false },
 ]
 
 const NavItem = ({ selected, disabled = false, content, ...props }) =>
@@ -49,7 +49,7 @@ const Navbar = () => {
   const tour = useTour()
 
   return (
-    <header className="absolute w-full z-50 top-0 flex text-lg font-medium h-16 justify-between bg-secondary items-center gap-4 px-4 md:px-20 dark:text-slate-400 text-slate-600">
+    <header className="absolute w-full z-50 top-0 flex text-lg font-medium h-16 justify-between bg-secondary gap-4 px-4 md:px-20 dark:text-slate-400 text-slate-600">
       <TooltipProvider delayDuration={10}>
         <nav className="hidden select-none sm:w-full gap-6 sm:grid sm:grid-cols-3 items-center justify-center">
           <div className="flex col-span-2 sm:flex-row items-center justify-end gap-4 ">
@@ -108,7 +108,7 @@ const Navbar = () => {
           <Tooltip>
             <TooltipTrigger>
               <div
-                className="hover:cursor-pointer hover:text-slate-300"
+                className="hover:cursor-pointer hover:text-slate-300 text-xs"
                 onClick={() => {
                   tour.setTourActive(!tour.tourActive)
                   setOpen(false)

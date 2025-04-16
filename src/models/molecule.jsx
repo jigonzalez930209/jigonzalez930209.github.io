@@ -8,7 +8,7 @@ import { Canvas } from '@react-three/fiber'
 import { Suspense, useEffect, useState } from 'react'
 import { Vector3 } from 'three'
 
-import { Loader } from '@/components'
+import Loader from '@/components/ui/loader/loader'
 
 import { useTour } from '@/components/tour-provider'
 import AnimatedMolecule from './animated-molecule'
