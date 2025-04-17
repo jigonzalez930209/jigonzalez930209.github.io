@@ -4,7 +4,8 @@ import * as React from 'react'
 import Molecule from '@/models/molecule'
 import imgFanHandlerProject from '../assets/images/fan-handler.png'
 import imgGrafProject from '../assets/images/graf.png'
-import imgImagesProject from '../assets/images/image.png'
+import imgProject from '../assets/images/image.png'
+import imgDecisionTreeProject from '../assets/images/decision-tree.png'
 import videoThisProjectProject from '../assets/videos/this-project.mp4'
 
 const ATOMS_DESCRIPTION = {
@@ -19,10 +20,10 @@ const ATOMS_DESCRIPTION = {
 const PROJECTS = [
   {
     id: 'C',
-    title: 'Graf_v3',
+    title: 'Graf_v4',
     description:
       'Tool for visualize and analyze the data from the teq4, teq4Z and CSV files',
-    link: 'https://github.com/jigonzalez930209/graf_v3',
+    link: 'https://github.com/jigonzalez930209/graf_v4',
     image: imgGrafProject,
   },
   {
@@ -31,7 +32,7 @@ const PROJECTS = [
     description:
       'Visualizer focused on electronic microscopic images to analyzer and modify it',
     link: 'https://github.com/jigonzalez930209/images',
-    image: imgImagesProject,
+    image: imgProject,
   },
   {
     id: 'O',
@@ -51,11 +52,11 @@ const PROJECTS = [
   },
   {
     id: 'H',
-    title: 'Projects I have worked on',
-    description:
-      'Experience in the development of software as fronted using React, NextJs, TailwindCSS, Material-UI, ShadCN and ThreeJS',
-    link: '#',
-    image: imgFanHandlerProject,
+    title:
+      'Full-stack development of an alternative teaching platform based on decision trees.',
+    description: '',
+    link: 'https://decision-0-tree.vercel.app/',
+    image: imgDecisionTreeProject,
   },
 ]
 
@@ -63,7 +64,7 @@ const Home = () => {
   const [selectedAtom, setSelectedAtom] = React.useState(null)
 
   return (
-    <div className="absolute w-full h-dvh overflow-hidden bg-slate-600 select-none">
+    <div className="absolute w-full h-dvh overflow-hidden bg-gradient-to-br from-gray-900 via-gray-700 to-black">
       <DialogCloseButton
         title={selectedAtom || ' '}
         content={ATOMS_DESCRIPTION[selectedAtom] || ' '}
