@@ -15,33 +15,24 @@ import {
 import { cn } from '@/utils'
 import { useTour } from './tour-provider'
 
-const NavLinkItems = [
+const navLinkItems = [
   { content: 'Home', to: '/' },
-  { content: 'Contact Me', to: '/contact', disabled: false },
-  { content: 'About', to: '/about', disabled: false },
+  { content: 'About', to: '/about' },
+  { content: 'Contact Me', to: '/contact' },
 ]
 
-const NavItem = ({ selected, disabled = false, content, ...props }) =>
-  disabled ? (
-    <div className="dark:text-slate-400 text-slate-800 text-lg relative">
-      <Tooltip>
-        <TooltipTrigger>{content}</TooltipTrigger>
-        <TooltipContent>
-          <p className="animate-pulse">Coming Soon</p>
-        </TooltipContent>
-      </Tooltip>
-    </div>
-  ) : (
-    <NavLink
-      className={cn(
-        'text-lg text-primary hover:text-foreground/50',
-        selected && 'text-blue-200'
-      )}
-      {...props}
-    >
-      {content}
-    </NavLink>
-  )
+const NavItem = ({ selected, content, action = () => {}, ...props }) => (
+  <NavLink
+    className={cn(
+      'text-lg text-gray-300 hover:text-white hover:underline transition-colors duration-200',
+      selected && 'text-white font-bold'
+    )}
+    {...props}
+    onClick={action}
+  >
+    {content}
+  </NavLink>
+)
 
 const Navbar = () => {
   const { pathname } = useLocation()
@@ -49,78 +40,104 @@ const Navbar = () => {
   const tour = useTour()
 
   return (
-    <header className="absolute w-full z-50 top-0 flex text-lg font-medium h-16 justify-between bg-secondary gap-4 px-4 md:px-20 dark:text-slate-400 text-slate-600">
+    <header
+      className="
+      w-full fixed top-0 z-50 flex items-center h-16
+      bg-black/80 backdrop-blur-md border border-white/10 shadow-xl
+      px-4 md:px-8 
+      text-gray-300
+    "
+    >
       <TooltipProvider delayDuration={10}>
-        <nav className="hidden select-none sm:w-full gap-6 sm:grid sm:grid-cols-3 items-center justify-center">
-          <div className="flex col-span-2 sm:flex-row items-center justify-end gap-4 ">
-            {NavLinkItems.map((item) => (
+        {/* Desktop Nav */}
+        <nav className="hidden sm:flex w-full justify-between items-center">
+          <div className="flex gap-8">
+            {navLinkItems.map((item) => (
               <NavItem
                 key={item.content}
                 selected={item.to === pathname}
                 content={item.content}
-                disabled={item.disabled}
                 {...item}
               />
             ))}
           </div>
-          <div className="w-full flex items-center justify-end">
-            <Tooltip>
-              <TooltipTrigger>
-                <div
-                  className="hover:cursor-pointer hover:text-slate-300"
-                  onClick={() => tour.setTourActive(!tour.tourActive)}
-                >
-                  take a tour
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="animate-pulse">Tour throw app</p>
-              </TooltipContent>
-            </Tooltip>
+          <div>
+            {pathname === '/' && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <div
+                    className="cursor-pointer text-gray-400 hover:text-white transition-colors duration-200"
+                    onClick={() => tour.setTourActive(!tour.tourActive)}
+                  >
+                    take a tour
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-black/80 text-gray-200">
+                  <p className="animate-pulse">Tour through app</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </nav>
-        <div className="w-full flex justify-between sm:hidden">
+
+        {/* Mobile Nav */}
+        <div className="flex sm:hidden w-full justify-between items-center">
           <Sheet open={open} onOpenChange={() => setOpen((p) => !p)}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                className="shrink-0 sm:hidden"
+                className="
+                  bg-gradient-to-r from-gray-500/20 to-blue-500/20
+                  text-white border border-gray-500/30
+                  hover:from-gray-500/30 hover:to-blue-500/30
+                  hover:scale-105 transition-all duration-300
+                  shadow-lg shadow-gray-500/20
+                  shrink-0
+                "
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left">
-              <nav className="grid gap-6">
-                {NavLinkItems.map((item) => (
+            <SheetContent
+              side="left"
+              className="
+              bg-black/80 backdrop-blur-md border border-white/10 shadow-xl
+              w-48 p-4 text-gray-200
+            "
+            >
+              <nav className="flex flex-col gap-6">
+                {navLinkItems.map((item) => (
                   <NavItem
                     key={item.content}
-                    selected={pathname.includes(item.to)}
+                    selected={item.to === pathname}
                     content={item.content}
-                    disabled={item.disabled}
+                    action={() => setOpen(false)}
                     {...item}
                   />
                 ))}
               </nav>
             </SheetContent>
           </Sheet>
-          <Tooltip>
-            <TooltipTrigger>
-              <div
-                className="hover:cursor-pointer hover:text-slate-300 text-xs"
-                onClick={() => {
-                  tour.setTourActive(!tour.tourActive)
-                  setOpen(false)
-                }}
-              >
-                take a tour
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="animate-pulse">Tour throw app</p>
-            </TooltipContent>
-          </Tooltip>
+          {pathname === '/' && (
+            <Tooltip>
+              <TooltipTrigger>
+                <div
+                  className="cursor-pointer text-gray-400 hover:text-white text-xs transition-colors duration-200"
+                  onClick={() => {
+                    tour.setTourActive(!tour.tourActive)
+                    setOpen(false)
+                  }}
+                >
+                  take a tour
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black/80 text-gray-200">
+                <p className="animate-pulse">Tour through app</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </TooltipProvider>
     </header>
