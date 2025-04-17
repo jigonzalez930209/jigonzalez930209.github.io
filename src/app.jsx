@@ -5,7 +5,7 @@ import { About, Contact, Home } from './pages'
 
 const App = () => {
   return (
-    <main className="bg-slate-300/20 w-screen h-screen relative">
+    <main className="bg-gradient-to-br from-gray-900 via-gray-700 to-black w-screen h-screen overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-accent scrollbar-thumb-rounded-md">
       <Router>
         <Navbar />
         <Routes>
