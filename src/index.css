@@ -1,6 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@plugin 'tailwind-scrollbar' {
+  nocompatible: true;
+  preferredstrategy: 'pseudoelements';
+}
 
 @layer base {
   :root {
@@ -24,6 +28,14 @@
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
     --radius: 0.5rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
   }
 
   .dark {
@@ -46,52 +58,38 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
-  }
-}
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
-  }
-}
-
-@layer utilities {
-  .step {
-    counter-increment: step;
-  }
-
-  .step:before {
-    @apply absolute inline-flex h-8 w-8 items-center justify-center rounded-full bg-muted text-center -indent-px text-base font-medium;
-    @apply ml-[-41px];
-    content: counter(step);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+    --sidebar-ring: oklch(0.439 0 0);
   }
 }
 
-/** Prevent scrolling on body when modal is open */
-body[style*='pointer-events: none'] .overflow-auto,
-body[style*='pointer-events: none'] .overflow-y-auto,
-body[style*='pointer-events: none'] .overflow-x-auto {
-  overflow: hidden !important;
+::-webkit-scrollbar {
+  width: 7px;
+  transition: width 0.3s ease;
 }
 
-@media (max-width: 640px) {
-  .container {
-    @apply px-4;
-  }
+::-webkit-scrollbar-track {
+  background: var(--sidebar);
+  border-radius: 8px;
 }
 
-/** Prevent scrolling on body when modal is open */
-body[style*='pointer-events: none'] .overflow-auto,
-body[style*='pointer-events: none'] .overflow-y-auto,
-body[style*='pointer-events: none'] .overflow-x-auto {
-  overflow: hidden !important;
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 5px;
+  transition: background 0.3s ease, width 0.3s ease;
 }
 
-@media (max-width: 640px) {
-  .container {
-    @apply px-4;
-  }
+::-webkit-scrollbar-track:hover,
+::-webkit-scrollbar-thumb:hover {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }
